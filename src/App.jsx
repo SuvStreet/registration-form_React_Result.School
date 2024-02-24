@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import iconGoogle from '../src/assets/icon-google.svg'
 
@@ -10,30 +10,80 @@ const initialState = {
 	confirmPassword: '',
 }
 
-const sendFormData = (formData) => {
-	console.log(formData)
+const initialError = {
+	email: null,
+	password: null,
+	confirmPassword: null,
 }
 
 const useStore = () => {
 	const [state, setState] = useState(initialState)
+	const [error, setError] = useState(initialError)
 
 	return {
 		getState: () => state,
 		updateState: (field, newField) => setState({ ...state, [field]: newField }),
+		resetForm: () => setState(initialState),
+		getError: () => error,
+		updateError: (field, newField) => setError({ ...error, [field]: newField }),
 	}
 }
 
-function App() {
-	const { getState, updateState } = useStore()
+const sendFormData = (formData) => {
+	console.log(formData)
+}
 
-	const onSubmit = (event) => {
-		event.preventDefault()
-		sendFormData(getState())
-	}
+// =============================
+
+function App() {
+	const { getError, updateError, getState, updateState, resetForm } = useStore()
 
 	const { email, password, confirmPassword } = getState()
 
+	const formRef = useRef(null)
+
+	const onSubmit = (event) => {
+		event.preventDefault()
+
+		if (
+			getState().email !== '' &&
+			getState().password !== '' &&
+			getState().confirmPassword !== ''
+		) {
+			sendFormData(getState())
+		}
+
+		resetForm()
+	}
+
 	const onChange = ({ target }) => {
+		let error = null
+
+		if (
+			!/[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/.test(target.value) &&
+			target.name === 'email'
+		) {
+			error = 'Введите корректную почту!'
+		} else if (target.value === '' && target.name === 'email') {
+			error = 'Поле не может быть пустым!'
+		}
+
+		if (!/^\d+$/.test(target.value) && target.name === 'password') {
+			error = 'Пороль должен быть из цифр!'
+		} else if (!/^\d{5,}$/.test(target.value) && target.name === 'password') {
+			error = 'Пароль должен содержать не менее 5 цифр!'
+		} else if (!/^\d{0,8}$/.test(target.value) && target.name === 'password') {
+			error = 'Пароль должен содержать не более 8 цифр!'
+		} else if (target.value === '' && target.name === 'password') {
+			error = 'Поле не может быть пустым!'
+		}
+
+		if (target.name === 'confirmPassword' && target.value !== password) {
+			error = 'Пароли не совпадают!'
+		}
+
+		updateError(target.name, error)
+
 		return updateState(target.name, target.value)
 	}
 
@@ -58,11 +108,19 @@ function App() {
 						<input
 							type='email'
 							name='email'
-							className={s.input + ' ' + (getState().email.length !== 0 ? s.isEmpty : '')}
+							className={
+								s.input +
+								' ' +
+								(getState().email.length !== 0 ? s.isEmpty : '') +
+								' ' +
+								(getError().email !== null ? s.error : '')
+							}
 							value={email}
 							onChange={onChange}
+							autoComplete='off'
 						/>
 						<label className={s.label}>Электронная почта</label>
+						{getError().email && <div className={s.loginError}>{getError().email}</div>}
 					</div>
 
 					<div className={s.input_content}>
@@ -70,12 +128,20 @@ function App() {
 							type='password'
 							name='password'
 							className={
-								s.input + ' ' + (getState().password.length !== 0 ? s.isEmpty : '')
+								s.input +
+								' ' +
+								(getState().password.length !== 0 ? s.isEmpty : '') +
+								' ' +
+								(getError().password !== null ? s.error : '')
 							}
 							value={password}
 							onChange={onChange}
+							autoComplete='off'
 						/>
 						<label className={s.label}>Пороль</label>
+						{getError().password && (
+							<div className={s.loginError}>{getError().password}</div>
+						)}
 					</div>
 
 					<div className={s.input_content}>
@@ -83,15 +149,31 @@ function App() {
 							type='password'
 							name='confirmPassword'
 							className={
-								s.input + ' ' + (getState().confirmPassword.length !== 0 ? s.isEmpty : '')
+								s.input +
+								' ' +
+								(getState().confirmPassword.length !== 0 ? s.isEmpty : '') +
+								' ' +
+								(getError().confirmPassword !== null ? s.error : '')
 							}
 							value={confirmPassword}
 							onChange={onChange}
+							autoComplete='off'
 						/>
 						<label className={s.label}>Повторите пароль</label>
+						{getError().confirmPassword && (
+							<div className={s.loginError}>{getError().confirmPassword}</div>
+						)}
 					</div>
 
-					<button className={s.button} type='submit'>
+					<button
+						className={s.button}
+						type='submit'
+						disabled={
+							getError().email !== null ||
+							getError().password !== null ||
+							getError().confirmPassword !== null
+						}
+					>
 						Зарегистрироваться
 					</button>
 				</form>
