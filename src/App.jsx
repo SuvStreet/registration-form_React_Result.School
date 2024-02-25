@@ -40,7 +40,7 @@ function App() {
 
 	const { email, password, confirmPassword } = getState()
 
-	const formRef = useRef(null)
+	const submitButtonFocusRef = useRef(null)
 
 	const onSubmit = (event) => {
 		event.preventDefault()
@@ -48,38 +48,52 @@ function App() {
 		if (
 			getState().email !== '' &&
 			getState().password !== '' &&
-			getState().confirmPassword !== ''
+			getState().confirmPassword !== '' &&
+			getError().email === null &&
+			getError().password === null &&
+			getError().confirmPassword === null
 		) {
 			sendFormData(getState())
+			resetForm()
 		}
-
-		resetForm()
 	}
 
 	const onChange = ({ target }) => {
 		let error = null
 
-		if (
+		if (target.value === '' && target.name === 'email') {
+			error = 'Поле не может быть пустым!'
+		} else if (
 			!/[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/.test(target.value) &&
 			target.name === 'email'
 		) {
 			error = 'Введите корректную почту!'
-		} else if (target.value === '' && target.name === 'email') {
-			error = 'Поле не может быть пустым!'
 		}
 
-		if (!/^\d+$/.test(target.value) && target.name === 'password') {
+		if (target.value === '' && target.name === 'password') {
+			error = 'Поле не может быть пустым!'
+		} else if (!/^\d+$/.test(target.value) && target.name === 'password') {
 			error = 'Пороль должен быть из цифр!'
 		} else if (!/^\d{5,}$/.test(target.value) && target.name === 'password') {
 			error = 'Пароль должен содержать не менее 5 цифр!'
 		} else if (!/^\d{0,8}$/.test(target.value) && target.name === 'password') {
 			error = 'Пароль должен содержать не более 8 цифр!'
-		} else if (target.value === '' && target.name === 'password') {
-			error = 'Поле не может быть пустым!'
+		}
+		
+		if (
+			target.name === 'confirmPassword' &&
+			target.value !== password &&
+			getError().password === null
+		) {
+			error = 'Пароли не совпадают!'
 		}
 
-		if (target.name === 'confirmPassword' && target.value !== password) {
-			error = 'Пароли не совпадают!'
+		if (
+			target.name === 'confirmPassword' &&
+			target.value === password &&
+			target.value !== ''
+		) {
+			submitButtonFocusRef.current.focus()
 		}
 
 		updateError(target.name, error)
@@ -165,15 +179,7 @@ function App() {
 						)}
 					</div>
 
-					<button
-						className={s.button}
-						type='submit'
-						disabled={
-							getError().email !== null ||
-							getError().password !== null ||
-							getError().confirmPassword !== null
-						}
-					>
+					<button className={s.button} type='submit' ref={submitButtonFocusRef}>
 						Зарегистрироваться
 					</button>
 				</form>
