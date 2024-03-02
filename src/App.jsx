@@ -1,104 +1,55 @@
-import { useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 import iconGoogle from '../src/assets/icon-google.svg'
 
 import s from './App.module.css'
 
-const initialState = {
-	email: '',
-	password: '',
-	confirmPassword: '',
-}
-
-const initialError = {
-	email: null,
-	password: null,
-	confirmPassword: null,
-}
-
-const useStore = () => {
-	const [state, setState] = useState(initialState)
-	const [error, setError] = useState(initialError)
-
-	return {
-		getState: () => state,
-		updateState: (field, newField) => setState({ ...state, [field]: newField }),
-		resetForm: () => setState(initialState),
-		getError: () => error,
-		updateError: (field, newField) => setError({ ...error, [field]: newField }),
-	}
-}
-
-const sendFormData = (formData) => {
-	console.log(formData)
-}
-
-// =============================
+const fieldScheme = yup.object().shape({
+	email: yup
+		.string()
+		.required('Это поле не может быть пустым!')
+		.matches(/[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/, 'Некорректный email'),
+	password: yup
+		.string()
+		.required('Это поле не может быть пустым!')
+		.matches(/^\d+$/, 'Пароль должен содержать только цифры!')
+		.matches(/^\d{5,}$/, 'Пароль должен содержать не менее 5 цифр!')
+		.matches(/^\d{0,8}$/, 'Пароль должен содержать не более 8 цифр!'),
+	confirmPassword: yup
+		.string()
+		.required('Это поле не может быть пустым!')
+		.oneOf([yup.ref('password'), null], 'Пароли не совпадают!'),
+})
 
 function App() {
-	const { getError, updateError, getState, updateState, resetForm } = useStore()
+	const {
+		register,
+		handleSubmit,
+		watch,
+		reset,
+		formState: { errors },
+		setFocus,
+	} = useForm({
+		defaultValues: {
+			email: '',
+			password: '',
+			confirmPassword: '',
+		},
+		resolver: yupResolver(fieldScheme),
+		mode: 'onTouched',
+	})
 
-	const { email, password, confirmPassword } = getState()
-
-	const submitButtonFocusRef = useRef(null)
-
-	const onSubmit = (event) => {
-		event.preventDefault()
-
-		if (
-			getState().email !== '' &&
-			getState().password !== '' &&
-			getState().confirmPassword !== '' &&
-			getError().email === null &&
-			getError().password === null &&
-			getError().confirmPassword === null
-		) {
-			sendFormData(getState())
-			resetForm()
-		}
+	const errorsForm = {
+		email: errors.email?.message,
+		password: errors.password?.message,
+		confirmPassword: errors.confirmPassword?.message,
 	}
 
-	const onChange = ({ target }) => {
-		let error = null
-
-		if (target.value === '' && target.name === 'email') {
-			error = 'Поле не может быть пустым!'
-		} else if (
-			!/[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/.test(target.value) &&
-			target.name === 'email'
-		) {
-			error = 'Введите корректную почту!'
-		}
-
-		if (target.value === '' && target.name === 'password') {
-			error = 'Поле не может быть пустым!'
-		} else if (!/^\d+$/.test(target.value) && target.name === 'password') {
-			error = 'Пороль должен быть из цифр!'
-		} else if (!/^\d{5,}$/.test(target.value) && target.name === 'password') {
-			error = 'Пароль должен содержать не менее 5 цифр!'
-		} else if (!/^\d{0,8}$/.test(target.value) && target.name === 'password') {
-			error = 'Пароль должен содержать не более 8 цифр!'
-		}
-		
-		if (
-			target.name === 'confirmPassword' &&
-			target.value !== password &&
-			getError().password === null
-		) {
-			error = 'Пароли не совпадают!'
-		}
-
-		if (
-			target.name === 'confirmPassword' &&
-			target.value === password &&
-			target.value !== ''
-		) {
-			submitButtonFocusRef.current.focus()
-		}
-
-		updateError(target.name, error)
-
-		return updateState(target.name, target.value)
+	const onSubmit = (formData) => {
+		console.log('formData', formData)
+		reset()
 	}
 
 	return (
@@ -117,7 +68,7 @@ function App() {
 					</div>
 				</div>
 
-				<form className={s.form} onSubmit={onSubmit}>
+				<form className={s.form} onSubmit={handleSubmit(onSubmit)} noValidate>
 					<div className={s.input_content}>
 						<input
 							type='email'
@@ -125,16 +76,15 @@ function App() {
 							className={
 								s.input +
 								' ' +
-								(getState().email.length !== 0 ? s.isEmpty : '') +
+								(watch('email').length !== 0 ? s.isEmpty : '') +
 								' ' +
-								(getError().email !== null ? s.error : '')
+								(errorsForm.email !== undefined ? s.error : '')
 							}
-							value={email}
-							onChange={onChange}
 							autoComplete='off'
+							{...register('email')}
 						/>
 						<label className={s.label}>Электронная почта</label>
-						{getError().email && <div className={s.loginError}>{getError().email}</div>}
+						{errorsForm.email && <div className={s.loginError}>{errorsForm.email}</div>}
 					</div>
 
 					<div className={s.input_content}>
@@ -144,17 +94,16 @@ function App() {
 							className={
 								s.input +
 								' ' +
-								(getState().password.length !== 0 ? s.isEmpty : '') +
+								(watch('password').length !== 0 ? s.isEmpty : '') +
 								' ' +
-								(getError().password !== null ? s.error : '')
+								(errorsForm.password !== undefined ? s.error : '')
 							}
-							value={password}
-							onChange={onChange}
 							autoComplete='off'
+							{...register('password')}
 						/>
 						<label className={s.label}>Пороль</label>
-						{getError().password && (
-							<div className={s.loginError}>{getError().password}</div>
+						{errorsForm.password && (
+							<div className={s.loginError}>{errorsForm.password}</div>
 						)}
 					</div>
 
@@ -165,21 +114,21 @@ function App() {
 							className={
 								s.input +
 								' ' +
-								(getState().confirmPassword.length !== 0 ? s.isEmpty : '') +
+								(watch('confirmPassword').length !== 0 ? s.isEmpty : '') +
 								' ' +
-								(getError().confirmPassword !== null ? s.error : '')
+								(errorsForm.confirmPassword !== undefined ? s.error : '')
 							}
-							value={confirmPassword}
-							onChange={onChange}
 							autoComplete='off'
+							{...register('confirmPassword')}
+							{...errorsForm.confirmPassword === undefined ? setFocus('submit') : ''}
 						/>
 						<label className={s.label}>Повторите пароль</label>
-						{getError().confirmPassword && (
-							<div className={s.loginError}>{getError().confirmPassword}</div>
+						{errorsForm.confirmPassword && (
+							<div className={s.loginError}>{errorsForm.confirmPassword}</div>
 						)}
 					</div>
 
-					<button className={s.button} type='submit' ref={submitButtonFocusRef}>
+					<button className={s.button} {...register('submit')} type='submit'>
 						Зарегистрироваться
 					</button>
 				</form>
