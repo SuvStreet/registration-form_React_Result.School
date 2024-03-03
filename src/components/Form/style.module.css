@@ -93,8 +93,6 @@ body.dark {
 	}
 }
 
-
-
 .dark .active:hover {
 	box-shadow: inset 3px 3px 10px var(--color-shadow-dark1),
 		inset -1px -1px 3px var(--color-shadow-dark2);
@@ -157,8 +155,8 @@ body.dark {
 		-1px -1px 6px var(--color-shadow-light2);
 }
 
-.dark .button,
-.dark .input {
+.dark .input,
+.dark .button {
 	color: var(--text-light);
 	box-shadow: 3px 3px 10px var(--color-shadow-dark1),
 		-1px -1px 6px var(--color-shadow-dark2);
@@ -228,7 +226,6 @@ body.dark {
 	box-shadow: inset 3px 3px 10px var(--color-shadow-light1),
 		inset -3px -3px 6px var(--color-shadow-light2);
 }
-
 
 @media (max-width: 450px) {
 	.groupBtn {
