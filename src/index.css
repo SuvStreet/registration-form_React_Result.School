@@ -9,8 +9,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100dvh;
-	background: #212121;
-	color: #ffffff;
 }
 
 #root {
