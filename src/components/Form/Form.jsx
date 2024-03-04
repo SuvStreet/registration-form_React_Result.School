@@ -152,7 +152,7 @@ function Form() {
 							autoComplete='off'
 							{...register('confirmPassword')}
 							{...(errorsForm.confirmPassword === undefined &&
-							watch('confirmPassword') !== ''
+							watch('confirmPassword') === watch('password')
 								? setFocus('submit')
 								: '')}
 						/>

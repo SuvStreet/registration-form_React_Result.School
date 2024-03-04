@@ -173,14 +173,14 @@ body.dark {
 	transform: translateY(-35px);
 }
 
-.input_content .isEmpty,
+.dark .input_content .isEmpty,
 .dark .input_content .input:focus {
 	box-shadow: 3px 3px 10px var(--color-shadow-dark1),
 		-1px -1px 6px var(--color-shadow-dark2), inset 3px 3px 10px var(--color-shadow-dark1),
 		inset -1px -1px 6px var(--color-shadow-dark2);
 }
 
-.input_content .isEmpty,
+.light .input_content .isEmpty,
 .light .input_content .input:focus {
 	box-shadow: 3px 3px 10px var(--color-shadow-light1),
 		-1px -1px 6px var(--color-shadow-light2),
