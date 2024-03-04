@@ -1,20 +1,14 @@
-import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 
 import fieldScheme from '../../utils/yup.js'
 
+import { Input } from '../Input/Input.jsx'
+import { SwitchTheme } from '../SwitchTheme/SwitchTheme.jsx'
+
 import s from './style.module.css'
 
 function Form() {
-	const [light, setLight] = useState(false)
-	const [dark, setDark] = useState(true)
-
-	useEffect(() => {
-		const body = document.querySelector('body')
-		body.classList.add(s.dark)
-	}, [])
-
 	const {
 		register,
 		handleSubmit,
@@ -38,24 +32,6 @@ function Form() {
 		confirmPassword: errors.confirmPassword?.message,
 	}
 
-	const handleClickSwitchTheme = (e) => {
-		const body = document.querySelector('body')
-
-		const { id } = e.target
-		if (id === 'light') {
-			body.classList.remove(s.dark)
-			body.classList.add(s.light)
-			setLight(true)
-			setDark(false)
-		}
-		if (id === 'dark') {
-			body.classList.remove(s.light)
-			body.classList.add(s.dark)
-			setLight(false)
-			setDark(true)
-		}
-	}
-
 	const onSubmit = (formData) => {
 		console.log('formData', formData)
 		reset()
@@ -67,32 +43,7 @@ function Form() {
 				<div className={s.header}>
 					<h1 className={s.title}>Создайте аккаунт</h1>
 
-					<div className={s.groupBtn} onClick={handleClickSwitchTheme}>
-						<button
-							className={
-								s.button +
-								' ' +
-								s.switchBtn +
-								' ' +
-								(light ? s.active + ' ' + s.inset : '')
-							}
-							id='light'
-						>
-							Светлая тема
-						</button>
-						<button
-							className={
-								s.button +
-								' ' +
-								s.switchBtn +
-								' ' +
-								(dark ? s.active + ' ' + s.inset : '')
-							}
-							id='dark'
-						>
-							Тёмная тема
-						</button>
-					</div>
+					<SwitchTheme />
 
 					<div className='text'>
 						<p>или используйте электронную почту для регистрации</p>
@@ -100,7 +51,9 @@ function Form() {
 				</div>
 
 				<form className={s.form} onSubmit={handleSubmit(onSubmit)} noValidate>
-					<div className={s.input_content}>
+					<Input {...{ register, errorsForm, watch, setFocus }} />
+
+					{/* <div className={s.input_content}>
 						<input
 							type='email'
 							name='email'
@@ -152,7 +105,8 @@ function Form() {
 							autoComplete='off'
 							{...register('confirmPassword')}
 							{...(errorsForm.confirmPassword === undefined &&
-							watch('confirmPassword') === watch('password')
+							watch('confirmPassword') === watch('password') &&
+							watch('password').length !== 0
 								? setFocus('submit')
 								: '')}
 						/>
@@ -160,7 +114,7 @@ function Form() {
 						{errorsForm.confirmPassword && (
 							<div className={s.loginError}>{errorsForm.confirmPassword}</div>
 						)}
-					</div>
+					</div> */}
 
 					<button className={s.button} {...register('submit')} type='submit'>
 						Зарегистрироваться

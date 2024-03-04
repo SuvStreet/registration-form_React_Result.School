@@ -1,0 +1,72 @@
+.input_content {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	position: relative;
+	margin-bottom: 40px;
+}
+
+.input_content .label {
+	font-size: 15px;
+	padding-left: 15px;
+	position: absolute;
+	top: 15px;
+	transition: 0.3s;
+	pointer-events: none;
+}
+
+.input_content .isEmpty ~ .label,
+.input_content .input:focus ~ .label {
+	transition: 0.3s;
+	padding-left: 2px;
+	transform: translateY(-35px);
+}
+
+:global(.dark) .input_content .isEmpty,
+:global(.dark) .input_content .input:focus {
+	box-shadow: 3px 3px 10px var(--color-shadow-dark1),
+		-1px -1px 6px var(--color-shadow-dark2), inset 3px 3px 10px var(--color-shadow-dark1),
+		inset -1px -1px 6px var(--color-shadow-dark2);
+}
+
+:global(.light) .input_content .isEmpty,
+:global(.light) .input_content .input:focus {
+	box-shadow: 3px 3px 10px var(--color-shadow-light1),
+		-1px -1px 6px var(--color-shadow-light2),
+		inset 3px 3px 10px var(--color-shadow-light1),
+		inset -1px -1px 6px var(--color-shadow-light2);
+}
+
+.input {
+	height: 45px;
+	border: 2px solid transparent;
+	outline: none;
+	padding: 0px 7px;
+	border-radius: 6px;
+	font-size: 15px;
+	background-color: transparent;
+}
+
+:global(.dark) .input {
+	color: var(--text-light);
+	box-shadow: 3px 3px 10px var(--color-shadow-dark1),
+		-1px -1px 6px var(--color-shadow-dark2);
+}
+
+:global(.light) .input {
+	color: var(--text-dark);
+	box-shadow: 3px 3px 10px var(--color-shadow-light1),
+		-1px -1px 6px var(--color-shadow-light2);
+}
+
+.input.error {
+	border: 2px solid red;
+}
+
+.loginError {
+	position: absolute;
+	bottom: -20px;
+	right: 15px;
+	color: red;
+	font-size: 13px;
+}
